@@ -1,12 +1,16 @@
 package dev.atm.Entity;
 
+import dev.atm.Enum.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
 @Entity
+@NoArgsConstructor
 @Table(name = "Account")
 public class Account {
     @Id
@@ -22,4 +26,31 @@ public class Account {
     private BigDecimal balance;
     @Column(name = "Status", nullable = false)
     private boolean status;
+    @Column(name = "Role", nullable = false)
+    private boolean role;
+
+    public Account(String login, int pin, String holdersName, BigDecimal balance, boolean status, boolean role) {
+        this.login = login;
+        this.pin = pin;
+        this.holdersName = holdersName;
+        this.balance = balance;
+        this.status = status;
+        this.role = role;
+    }
+
+    public Account(String login, int pin, String holdersName, boolean status, boolean role) {
+        this.login = login;
+        this.pin = pin;
+        this.holdersName = holdersName;
+        this.status = status;
+        this.role = role;
+    }
+
+    public Role getCurrentRole() {
+        return (role) ? Role.Admin : Role.Client;
+    }
+
+    public String getCurrentStatus() {
+        return (status) ? "Active" : "Disabled";
+    }
 }

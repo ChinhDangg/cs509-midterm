@@ -10,14 +10,12 @@ import java.util.Optional;
 
 @Service
 public class AccountService {
-
     private final AccountRepository accountRepository;
 
     public AccountService(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
     }
 
-    @Transactional(readOnly = true)
     public Account checkLogin(String login, String pin) {
         if (!login.isEmpty() && !pin.isEmpty() && pin.matches("\\d+")) {
             Optional<Account> acc = accountRepository.findByLoginAndPin(login, Integer.parseInt(pin));
@@ -27,7 +25,6 @@ public class AccountService {
         return null;
     }
 
-    @Transactional(readOnly = true)
     public Account getAccountById(int id) {
         Optional<Account> acc = accountRepository.findById(id);
         return acc.orElse(null);
@@ -54,6 +51,45 @@ public class AccountService {
             }
         }
         return null;
+    }
+
+    @Transactional
+    public int addNewAccount(Account acc) {
+        if (acc != null)
+            try {
+                return accountRepository.save(acc).getId();
+            } catch (Exception e) {
+                return -1;
+            }
+        return -1;
+    }
+
+    @Transactional
+    public int updateAccount(Account acc, int id) {
+        Account previous = getAccountById(id);
+        if (previous != null) {
+            try {
+                accountRepository.updateAccountBy(acc.getLogin(), acc.getPin(), acc.getHoldersName(), acc.isStatus(), acc.isRole(), id);
+                return acc.getId();
+            } catch (Exception e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    @Transactional
+    public boolean deleteAccount(int id) {
+        Account acc = getAccountById(id);
+        if (acc != null) {
+            try {
+                accountRepository.deleteById(id);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
     }
 
 

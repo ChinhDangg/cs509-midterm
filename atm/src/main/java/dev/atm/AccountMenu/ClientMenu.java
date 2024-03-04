@@ -1,11 +1,12 @@
-package dev.atm;
+package dev.atm.AccountMenu;
 
+import dev.atm.AccountService;
 import dev.atm.Entity.Account;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 @Component
@@ -15,62 +16,19 @@ public class ClientMenu {
         this.accountService = accountService;
     }
 
-    public void runMenu() {
-        Scanner scanner = new Scanner(System.in);
-        while(true) {
-            String[] loginInfo = getLoginInfo(scanner);
-            if (loginInfo == null)
-                continue;
-            Account acc = accountService.checkLogin(loginInfo[0], loginInfo[1]);
-            if (!checkLogin(acc))
-                continue;
-
-            boolean running = true;
-            while (running) {
-                int option = getOptions(scanner);
-                if (option == 1)
-                    running = withdrawCash(scanner, acc.getId());
-                else if (option == 2)
-                    running = depositCash(scanner, acc.getId());
-                else if (option == 3)
-                    displayAccountBalance(acc.getId());
-                else
-                    running = false;
-            }
+    public void runMenu(Scanner scanner, int id) {
+        boolean running = true;
+        while (running) {
+            int option = getOption(scanner);
+            if (option == 1)
+                running = withdrawCash(scanner, id);
+            else if (option == 2)
+                running = depositCash(scanner, id);
+            else if (option == 3)
+                displayAccountBalance(id);
+            else
+                running = false;
         }
-    }
-
-    private boolean checkLogin(Account account) {
-        if (account == null) {
-            System.out.println("Wrong login or pin");
-            return false;
-        }
-        else if (!account.isStatus()) {
-            System.out.println("Your account is currently disabled, please contact your bank");
-            return false;
-        }
-        return true;
-    }
-
-    private String[] getLoginInfo(Scanner scanner) {
-        System.out.println();
-        System.out.print("Enter login: ");
-        String login = scanner.nextLine();
-        System.out.print("Enter Pin code: ");
-        String pin = scanner.nextLine();
-        if (login.isEmpty()) {
-            System.out.println("Please enter your login");
-            return null;
-        }
-        else if (pin.isEmpty()) {
-            System.out.println("Please enter your pin");
-            return null;
-        }
-        else if (!pin.matches("\\d+")) {
-            System.out.println("Please enter your pin in correct format");
-            return null;
-        }
-        return new String[]{ login, pin };
     }
 
     private void displayAccountBalance(int id) {
@@ -90,7 +48,7 @@ public class ClientMenu {
         if (newBalance != null) {
             System.out.println("Cash Deposited Successfully");
             System.out.println("Account #" + id);
-            System.out.println("Date: " + LocalDate.now());
+            System.out.println("Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
             System.out.println("Deposited: " + amount);
             System.out.println("Balance: " + newBalance);
             return true;
@@ -127,7 +85,7 @@ public class ClientMenu {
         if (newBalance != null) {
             System.out.println("Cash Successfully Withdrawn");
             System.out.println("Account #" + acc.getId());
-            System.out.println("Date: " + LocalDate.now());
+            System.out.println("Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
             System.out.println("Withdrawn: " + amount);
             System.out.println("Balance: " + newBalance);
             return true;
@@ -154,7 +112,7 @@ public class ClientMenu {
         return null;
     }
 
-    private int getOptions(Scanner scanner) {
+    private int getOption(Scanner scanner) {
         System.out.println();
         int attempt = 5;
         while (attempt > 0) {
